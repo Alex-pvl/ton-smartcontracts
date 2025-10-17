@@ -35,23 +35,31 @@ const const::min_tokens_for_storage = 10000000; ;; 0.01 TON
     }
 
     if (op == 2) {
-        ;; deposit
+        return();
     }
 
     if (op == 3) {
         throw_unless(103, equal_slice_bits(sender_address, owner_address));
         int withdrawal_amount = in_msg_body~load_coins();
         var [balance, _] = get_balance();
-        throw_unless(104, balance >= withdrawal_amount);
+        throw_unless(104, balance - const::min_tokens_for_storage >= withdrawal_amount);
 
         int return_value = min(withdrawal_amount, balance - const::min_tokens_for_storage);
 
-        ;; TODO sending internal message with funds
+        int msg_mode = 1; ;; 0 (Ordinary message) + 1 (Pay transfer fees separately from the message value)
+
+        var msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(sender_address)
+            .store_coins(return_value)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
+
+        send_raw_message(msg.end_cell(), msg_mode);
 
         return ();
     }
 
-    return ();
+    throw(777);
 }
 
 (int, slice, slice) get_contract_storage_data() method_id {
@@ -61,4 +69,9 @@ const const::min_tokens_for_storage = 10000000; ;; 0.01 TON
         recent_sender,
         owner_address
     );
+}
+
+int balance() method_id {
+  var [balance, _] = get_balance();
+  return balance;
 }

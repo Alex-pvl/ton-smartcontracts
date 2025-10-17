@@ -1,4 +1,4 @@
-import { Address, Cell, contractAddress, toNano } from "ton-core";
+import { Address, Cell, contractAddress, toNano } from "@ton/core";
 import { hex } from "../build/main.compiled.json";
 import { getHttpV4Endpoint } from "@orbs-network/ton-access";
 import { TonClient4 } from "ton";
